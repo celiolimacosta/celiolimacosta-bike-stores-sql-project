@@ -1,0 +1,48 @@
+/* ============================================================
+   Capítulo 2 – Quem está fazendo a diferença?
+   ------------------------------------------------------------
+   Neste capítulo, o foco foi descobrir quem impulsiona os resultados:
+   - Quais funcionários geraram mais receita recentemente.
+   - Quais produtos sustentam a margem com preço alto e pouco desconto.
+   ============================================================ */
+
+ /* ============================================================
+    1. Qual funcionário gerou mais receita no último semestre?
+    ------------------------------------------------------------
+    - Soma o valor total de vendas atribuídas a cada funcionário.
+    - Considera apenas pedidos finalizados (order_status = 4).
+    - Limita o período aos últimos 6 meses a partir da data atual.
+    - Agrupa por funcionário e retorna o ranking decrescente.
+    ============================================================ */
+SELECT 
+    st.first_name + ' ' + st.last_name AS funcionario,
+    s.store_name AS loja,
+    SUM(oi.quantity * oi.list_price * (1 - oi.discount)) AS receita
+FROM sales.orders o
+JOIN sales.order_items oi ON o.order_id = oi.order_id
+JOIN sales.staffs st ON o.staff_id = st.staff_id
+JOIN sales.stores s ON s.store_id = st.store_id
+WHERE o.order_status = 4
+  AND o.order_date >= dateadd(month, -6, getdate())
+GROUP BY st.first_name, st.last_name, s.store_name
+ORDER BY receita desc;
+
+ /* ============================================================
+    2. Quais produtos possuem maior valor médio de venda e menor desconto aplicado?
+    ------------------------------------------------------------
+    - Calcula o preço médio de venda (list_price - desconto).
+    - Calcula o desconto médio aplicado em cada produto.
+    - Agrupa por produto e ordena:
+      * primeiro pelo maior preço médio de venda,
+      * depois pelo menor desconto médio.
+    ============================================================ */
+SELECT 
+    p.product_name AS produto,
+    AVG(oi.list_price * (1 - oi.discount)) AS preco_medio_venda,
+    AVG(oi.discount) AS desconto_medio
+FROM sales.order_items oi
+JOIN production.products p ON oi.product_id = p.product_id
+JOIN sales.orders o ON o.order_id = oi.order_id
+WHERE o.order_status = 4
+GROUP BY p.product_name
+ORDER BY preco_medio_venda desc, desconto_medio asc;
