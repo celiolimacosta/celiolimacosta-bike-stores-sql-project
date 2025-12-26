@@ -1,0 +1,42 @@
+/* ============================================================
+   Capítulo 4 – E os clientes? Como se comportam?
+   ------------------------------------------------------------
+   O objetivo é analisar o perfil e o comportamento de compra 
+   dos clientes: concentração de vendas e prazos de envio.
+   ============================================================ */
+
+ /* ============================================================
+    1. Existe concentração de vendas por estado ou cidade?
+    ------------------------------------------------------------
+    - Calcula o valor total vendido em cada estado e cidade.
+    - Considera apenas pedidos concluídos (order_status = 4).
+    - Ordena pelo valor total decrescente para destacar os polos.
+    ============================================================ */
+SELECT 
+    c.state,
+    c.city,
+    SUM(oi.quantity * oi.list_price * (1 - oi.discount)) AS valor_total
+FROM sales.customers c
+JOIN sales.orders o ON c.customer_id = o.customer_id
+JOIN sales.order_items oi ON o.order_id = oi.order_id
+WHERE o.order_status = 4
+GROUP BY c.state, c.city
+ORDER BY valor_total desc;
+
+ /* ============================================================
+    2. Qual o ciclo médio entre pedido e envio por região?
+    ------------------------------------------------------------
+    - Mede o tempo médio (em dias) entre a data do pedido 
+      (order_date) e a data de envio (shipped_date).
+    - Agrupa por estado para entender variações regionais.
+    - Filtra apenas pedidos concluídos e já enviados.
+    ============================================================ */
+SELECT 
+    c.state,
+    AVG(datediff(day, o.order_date, o.shipped_date)) AS ciclo_medio_dias
+FROM sales.customers c
+JOIN sales.orders o ON c.customer_id = o.customer_id
+WHERE o.order_status = 4 
+  AND o.shipped_date is not null
+GROUP BY c.state
+ORDER BY ciclo_medio_dias asc;
