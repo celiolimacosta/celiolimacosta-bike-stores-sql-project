@@ -15,7 +15,8 @@ bike-stores-sql-project/
 ├── capitulo4_clientes.sql # comportamento dos clientes
 ├── capitulo5_sazonalidade.sql # análise de padrões e tendências
 └── dataset/
-└── bike_stores_create.sql # script para criação das tabelas
+└── BikeStores Sample Database - create objects # script para criação das tabelas
+└── BikeStores Sample Database - load data # script para inserção dos dados
 ```
 
 ---
